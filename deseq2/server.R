@@ -49,7 +49,9 @@ function(input, output) {
       geom_point(aes(text = paste('Gene ID: ', gene_id, '<br>Normalized mean: ', mean, '<br>log fold change: ', lfc))) +
       xlab('Log base mean') + 
       ylab('Log fold change')
-    ggplotly(p) %>% layout(dragmode = 'select')
+    ggplotly(p) %>% layout(dragmode = 'select',
+                           title = "MA plot")
+    #=====!!! plot_ly() reports wrong keys======
     # plot_ly(
     #   df, x = ~log(mean), y = ~lfc, key = ~gene_id,
     #   # hover text:
@@ -73,9 +75,30 @@ function(input, output) {
   })
   
   #>>>render click and drag data
-  output$brush = renderPrint({
+  output$brush = renderDataTable({
     d = event_data("plotly_selected")
+    res = results(dds())[d$key, ]
+    res = as.data.frame(res)
     # if (is.null(d)) "Click and drag events appear here" else datatable(res)
-    str(d)
+    datatable(res)
+  })
+  
+  #>>>render click
+  output$click = renderPlotly({
+    d = event_data("plotly_click")
+    dds = dds()
+    dds_count = counts(dds[d$key, ])
+    count = dds_count[d$key,]
+    sample = colnames(dds_count)
+    group = colData()[sample, 'condition']
+    df = data.frame(count,sample, group)
+    # ggplotly
+    p = ggplot(data=df, aes(x=group, y=count, col=group)) +
+      geom_jitter(aes(text=paste('Sample: ', sample)))
+    ggplotly(p) %>% layout(dragmode = 'select',
+                           title = d$key,
+                           xaxis = list(title="Group"),
+                           yaxis = list(title="Count"))
+
   })
 }

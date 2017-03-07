@@ -25,8 +25,10 @@ fluidPage(
           tags$br(),
           plotlyOutput("MA_plot"),
           tags$br(),
-          verbatimTextOutput("brush")
-          # dataTableOutput("brush")
+          # verbatimTextOutput("hover"),
+          plotlyOutput("click"),
+          tags$br(),
+          dataTableOutput("brush")
         ))
       )
     )
