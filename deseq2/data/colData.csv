@@ -1,0 +1,8 @@
+"","condition","type"
+"treated1","treated","single"
+"treated2","treated","paired"
+"treated3","treated","paired"
+"untreated1","untreated","single"
+"untreated2","untreated","single"
+"untreated3","untreated","paired"
+"untreated4","untreated","paired"
