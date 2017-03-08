@@ -23,14 +23,11 @@ fluidPage(
                                    selected='wald'),
                        conditionalPanel("input.testMethod == 'wald'",
                                         uiOutput('waldDesign'),
-                                        # uiOutput('waldInteraction'),
-                                        # uiOutput('waldInteractionTerm'),
                                         tags$hr(),
                                         actionButton('runWald', label = 'Run')
                                         ),
                        conditionalPanel("input.testMethod == 'lrt'",
                                         uiOutput('lrtFullModel'),
-                                        # uiOutput('lrtInteraction'),
                                         uiOutput('lrtReducedModel'),
                                         tags$hr(),
                                         actionButton('runLRT', label = 'Run')
