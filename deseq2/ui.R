@@ -23,18 +23,21 @@ fluidPage(
                                    selected='wald'),
                        conditionalPanel("input.testMethod == 'wald'",
                                         uiOutput('waldDesign'),
-                                        tags$hr(),
                                         actionButton('runWald', label = 'Run')
                                         ),
                        conditionalPanel("input.testMethod == 'lrt'",
                                         uiOutput('lrtFullModel'),
                                         uiOutput('lrtReducedModel'),
-                                        tags$hr(),
                                         actionButton('runLRT', label = 'Run')
                                         )
                        ),
-      conditionalPanel('input.waldDesign',
-                       uiOutput('waldContrastFactor')
+      #---DESeq results exploration conditional on complete DESeq analysis
+      conditionalPanel('output.deseq_complete_check',
+                       tags$h3('DESeq Results Exploration'),
+                       uiOutput('waldContrastFactor'),
+                       uiOutput('waldControlLevel'),
+                       conditionalPanel('output.waldControlLevelComplete',
+                                        uiOutput('waldTreatedLevel'))
                        )
     ),
     mainPanel(

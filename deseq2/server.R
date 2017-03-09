@@ -37,12 +37,7 @@ function(input, output) {
                    multiple=TRUE,
                    choices=features)
   })
-  # select contrast factors
-  output$waldContrastFactor = renderUI({
-    factor = input$waldDesign
-    selectInput('waldContrastFactor', label='Contrast Factor',
-                choices=input$waldDesign)
-  })
+
   
   #===== LRT Test ===============
   # features in full model
@@ -64,6 +59,7 @@ function(input, output) {
   
   
   #========= Run DESeq Analysis ===========
+  # wald test
   ddsWald = eventReactive(input$runWald, {
     countData = countData()
     colData = colData()
@@ -77,6 +73,41 @@ function(input, output) {
     # dds$condition = relevel(dds$condition, ref="untreated")
     # differential expression analysis
     DESeq(dds)
+  })
+  
+  
+  #------ DESeq analysis complete check --------
+  output$deseq_complete_check = reactive({
+    if(is.na(ddsWald())) return(FALSE) else return(TRUE)
+  })
+  outputOptions(output, 'deseq_complete_check', suspendWhenHidden=FALSE)
+  
+  #>>>render factor selection UI
+  output$waldContrastFactor = renderUI({
+    factor = input$waldDesign
+    selectInput('waldContrastFactor', label='Contrast Factor',
+                choices=input$waldDesign)
+  })
+  #>>>render control level from selected factor
+  output$waldControlLevel = renderUI({
+    selectedFactor = input$waldContrastFactor
+    allLevels = colData()[, selectedFactor]
+    selectInput('waldContrastLevel', label='Contrast Level',
+                choices=allLevels)
+  })
+  # control level selection complete check
+  output$waldControlLevelComplete = reactive({
+    if(is.na(input$waldContrastLevel)) return(FALSE) else return(TRUE)
+  })
+  outputOptions(output, 'waldControlLevelComplete', suspendWhenHidden=FALSE)
+  #>>>render treated level from selected factor
+  output$waldTreatedLevel = renderUI({
+    selectedFactor = input$waldContrastFactor
+    allLevels = colData()[, selectedFactor]
+    # remove element that has been selected as control level
+    allLevels = allLevels[allLevels != input$waldContrastLevel]
+    selectInput('waldTreatedLevel', label='Treated Level',
+                choices=allLevels)
   })
   
   output$ddsWaldPrint = renderPrint({
