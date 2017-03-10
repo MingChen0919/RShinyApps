@@ -27,6 +27,17 @@ function(input, output) {
   })
   outputOptions(output, 'file_upload_check', suspendWhenHidden=FALSE)
   
+  ##----- display upload data in tables -------------
+  #>>>render countData table
+  output$countDataTable = renderDataTable({
+    datatable(countData(), filter='top', caption='Table 1: gene expression count matrix')
+  })
+  
+  #>>>render colData table
+  output$colDataTable = renderDataTable({
+    datatable(colData(), filter='top', caption='Table 2: gene expression treatment information')
+  })
+  
   
   #===== Wald Test ===============
   # add features to design formula
@@ -81,7 +92,9 @@ function(input, output) {
     if(is.na(ddsWald())) return(FALSE) else return(TRUE)
   })
   outputOptions(output, 'deseq_complete_check', suspendWhenHidden=FALSE)
+  #---------------------------------------------
   
+  #======== user input UI results exploration ======
   #>>>render factor selection UI
   output$waldContrastFactor = renderUI({
     factor = input$waldDesign
@@ -92,61 +105,53 @@ function(input, output) {
   output$waldControlLevel = renderUI({
     selectedFactor = input$waldContrastFactor
     allLevels = colData()[, selectedFactor]
-    selectInput('waldContrastLevel', label='Contrast Level',
+    selectInput('waldControlLevel', label='Contrast Level',
                 choices=allLevels)
   })
-  # control level selection complete check
+  
+  #---control level selection complete check---
   output$waldControlLevelComplete = reactive({
-    if(is.na(input$waldContrastLevel)) return(FALSE) else return(TRUE)
+    if(is.na(input$waldControlLevel)) return(FALSE) else return(TRUE)
   })
   outputOptions(output, 'waldControlLevelComplete', suspendWhenHidden=FALSE)
+  
   #>>>render treated level from selected factor
   output$waldTreatedLevel = renderUI({
     selectedFactor = input$waldContrastFactor
     allLevels = colData()[, selectedFactor]
     # remove element that has been selected as control level
-    allLevels = allLevels[allLevels != input$waldContrastLevel]
+    allLevels = allLevels[allLevels != input$waldControlLevel]
     selectInput('waldTreatedLevel', label='Treated Level',
                 choices=allLevels)
   })
+  ##================================================
   
-  output$ddsWaldPrint = renderPrint({
-    countData = countData()
-    colData = colData()
-    design = as.formula(paste0('~', paste(input$waldDesign, collapse='+')))
-    dds = DESeqDataSetFromMatrix(countData = countData,
-                                 colData = colData,
-                                 design = design)
-    # pre-filtering (remove rows that have only 0 or 1 read)
-    dds = dds[rowSums(counts(dds)) > 1, ]
-    # set reference level
-    # dds$condition = relevel(dds$condition, ref="untreated")
-    # differential expression analysis
-    dds = DESeq(dds)
-    res = results(dds)
-    res
+  
+  ##======= render results after user input ========
+  ## results(dds, contrast=c("condition","B","A"))
+  contrastTable = reactive({
+    contrastFactor = input$waldContrastFactor
+    controlLevel = input$waldControlLevel
+    treatedLevel = input$waldTreatedLevel
+    res = results(ddsWald(), contrast=c(contrastFactor, controlLevel, treatedLevel))
+    # res = as.matrix(res)
   })
   
-  # render results as a datatable
-  output$resTableWald = renderDataTable({
-    res = results(ddsWald())
-    datatable(as.matrix(res))
+  output$waldResultTable = renderDataTable({
+    caption = paste0('Gene expression comparison: ', 
+                     input$waldControlLevel, ' vs ', input$waldTreatedLevel)
+    df = as.matrix(contrastTable())
+    datatable(df, filter="top", caption=caption)
   })
-
+  ##================================================
   
-  #>>>render countData table
-  output$countDataTable = renderDataTable({
-    datatable(countData(), filter='top', caption='Table 1: gene expression count matrix')
-  })
   
-  #>>>render colData table
-  output$colDataTable = renderDataTable({
-    datatable(colData(), filter='top', caption='Table 2: gene expression treatment information')
-  })
   
-  #>>>render MA plot
-  output$MA_plot = renderPlotly({
-    res = results(ddsWald())
+  ##========== Resualt Visualization ===============
+  ##
+  ##-----------MA plot -----------------------------
+  dfMAplot = reactive({
+    res = contrastTable()
     # df for plot
     df = data.frame(gene_id = rownames(res),
                     mean = res$baseMean,
@@ -154,27 +159,40 @@ function(input, output) {
                     sig = ifelse(res$padj < 0.1, TRUE, FALSE),
                     col = ifelse(res$padj < 0.1, "padj<0.1", "padj>=0.1"),
                     stringsAsFactors = FALSE)
-    p = ggplot(data = df, aes(x = log(mean), y = lfc, col = col, key = gene_id)) +
+    rownames(df) = df$gene_id
+    return(df)
+  })
+  # output$dfMAplot = renderPrint({
+  #   dfMAplot()
+  # })
+  #>>>render MA plot
+  output$MA_plot = renderPlotly({
+    p = ggplot(data = dfMAplot(), aes(x = log(mean), y = lfc, col = col, key = gene_id)) +
       geom_point(aes(text = paste('Gene ID: ', gene_id, '<br>Normalized mean: ', mean, '<br>log fold change: ', lfc))) +
-      xlab('Log base mean') + 
+      xlab('Log base mean') +
       ylab('Log fold change')
     ggplotly(p) %>% layout(dragmode = 'select',
                            title = "MA plot")
   })
   
-  #>>>render click and drag data
+  # #>>>render click and drag data
   output$brush = renderDataTable({
     d = event_data("plotly_selected")
-    res = results(ddsWald())[d$key, ]
-    res = as.data.frame(res)
-    # if (is.null(d)) "Click and drag events appear here" else datatable(res)
-    datatable(res)
+    if(is.na(d$key)) {
+      return(NULL)
+    } else {
+      # res = subset(dfMAplot(), gene_id == d$key)
+      df = dfMAplot()
+      # res = df[df$gene_id == d$key, ]
+      res = df[d$key, ]
+      datatable(res)
+    }
   })
-  
+
   #>>>render click
   output$click = renderPlotly({
     d = event_data("plotly_click")
-    if(is.null(d)) return(NULL)
+    if(is.null(d$key)) return(NULL)
     dds = ddsWald()
     dds_count = counts(dds[d$key, ])
     count = dds_count[d$key,]

@@ -49,16 +49,18 @@ fluidPage(
           dataTableOutput("colDataTable")
         )),
         tabPanel('DESeq Analysis Results', verticalLayout(
-          verbatimTextOutput('ddsWaldPrint'),
-          dataTableOutput('resTableWald')
+          # verbatimTextOutput('ddsWaldPrint'),
+          dataTableOutput('waldResultTable')
         )),
         tabPanel('MA plot', verticalLayout(
           tags$br(),
-          plotlyOutput("MA_plot"),
-          tags$br(),
-          # verbatimTextOutput("hover"),
-          plotlyOutput("click"),
-          tags$br(),
+          # verbatimTextOutput('dfMAplot'),
+          # plotlyOutput("MA_plot"),
+          # tags$br(),
+          # plotlyOutput("click"),
+          # tags$br(),
+          fluidRow(column(width=6, plotlyOutput("MA_plot")),
+                   column(width=6, plotlyOutput("click"))),
           dataTableOutput("brush")
         )),
         tabPanel('Comparison'),
