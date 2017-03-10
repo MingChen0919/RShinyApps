@@ -3,7 +3,7 @@ library(DT)
 library(plotly)
 
 
-function(input, output) {
+function(input, output, session) {
   # countData
   countData = reactive({
     if(is.null(input$countDataInput)){
@@ -156,7 +156,8 @@ function(input, output) {
     df = data.frame(gene_id = rownames(res),
                     mean = res$baseMean,
                     lfc = res$log2FoldChange,
-                    sig = ifelse(res$padj < 0.1, TRUE, FALSE),
+                    padj = res$padj,
+                    # sig = ifelse(res$padj < 0.1, TRUE, FALSE),
                     col = ifelse(res$padj < 0.1, "padj<0.1", "padj>=0.1"),
                     stringsAsFactors = FALSE)
     rownames(df) = df$gene_id
@@ -208,4 +209,21 @@ function(input, output) {
                            yaxis = list(title="Count"))
 
   })
+  
+  
+  ##-------- heatmap --------------
+  ## heatmap data
+  output$heatmap = renderPlotly({
+    cnt = counts(ddsWald())
+    x = colnames(cnt)
+    y = rownames(cnt)
+    z = as.matrix(cnt)
+    
+    plot_ly(x=x, y=y, z=z, key=y,
+            type="heatmap", source="heatplot") %>%
+      layout(xaxis = list(title = ""), 
+             yaxis = list(title = ""))
+  })
+  
+
 }

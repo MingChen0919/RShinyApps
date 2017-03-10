@@ -64,7 +64,9 @@ fluidPage(
           dataTableOutput("brush")
         )),
         tabPanel('Comparison'),
-        tabPanel('Heatmap'),
+        tabPanel('Heatmap', verticalLayout(
+          plotlyOutput("heatmap")
+        )),
         tabPanel('Principal Component Plot')
       )
     )
