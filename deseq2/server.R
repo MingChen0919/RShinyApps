@@ -224,6 +224,23 @@ function(input, output, session) {
       layout(xaxis = list(title = ""), 
              yaxis = list(title = ""))
   })
+  ## gene correlation from heatmap click
+  # output$heatmapClick = renderPlotly({
+  #   s <- event_data("plotly_click", source = "heatplot")
+  #   if (length(s)) {
+  #     vars <- c(s[["x"]], s[["y"]])
+  #     d <- setNames(mtcars[vars], c("x", "y"))
+  #     yhat <- fitted(lm(y ~ x, data = d))
+  #     plot_ly(d, x = ~x) %>%
+  #       add_markers(y = ~y) %>%
+  #       add_lines(y = ~yhat) %>%
+  #       layout(xaxis = list(title = s[["x"]]), 
+  #              yaxis = list(title = s[["y"]]), 
+  #              showlegend = FALSE)
+  #   } else {
+  #     plotly_empty()
+  #   }
+  # })
   
 
 }
