@@ -10,4 +10,9 @@ function(input, output) {
   output$o_dateRangeInput = renderPrint({cat('6. dateRangeInput \n'); str(input$dateRangeInput)})
   output$o_fileInput = renderPrint({cat('7. fileInput \n'); str(input$fileInput)})
   output$o_passwordInput = renderPrint({cat('8. passwordInput \n'); str(input$passwordInput)})
+  output$o_radioButtons = renderPrint({cat('9. radioButtons \n'); str(input$radioButtons)})
+  output$o_selectInput = renderPrint({cat('10. selectInput \n'); str(input$selectInput)})
+  output$o_sliderInput = renderPrint({cat('11. sliderInput \n'); str(input$sliderInput)})
+  output$o_textInput = renderPrint({cat('12. textInput \n'); str(input$textInput)})
+  # output$o_submitButton = renderPrint({})
 }

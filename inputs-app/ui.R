@@ -13,7 +13,12 @@ fluidPage(
       dateInput(inputId = 'dateInput', label = '5. date input'),
       dateRangeInput(inputId = 'dateRangeInput', label = '6. date range input'),
       fileInput(inputId = 'fileInput', label = '7. file input'),
-      passwordInput(inputId = 'passwordInput', label = '8. password input')
+      passwordInput(inputId = 'passwordInput', label = '8. password input'),
+      radioButtons(inputId = 'radioButtons', label = '9. radio buttons', choices = c('cat', 'dog', 'sheep'), selected = ('dog')),
+      selectInput(inputId = 'selectInput', label = '10. select input', choices = c('cat', 'dog', 'sheep'), selected = ('dog')),
+      sliderInput(inputId = 'sliderInput', label = '11. slider input', min = 5, max = 100, value = 24),
+      textInput(inputId = 'textInput', label = '12. text input')
+      # submitButton(text = '13. submitButton')
     ),
     mainPanel(
       titlePanel('Input Values'),
@@ -24,7 +29,12 @@ fluidPage(
       verbatimTextOutput(outputId = "o_dateInput"),
       verbatimTextOutput(outputId = "o_dateRangeInput"),
       verbatimTextOutput(outputId = 'o_fileInput'),
-      verbatimTextOutput(outputId = 'o_passwordInput')
+      verbatimTextOutput(outputId = 'o_passwordInput'),
+      verbatimTextOutput(outputId = 'o_radioButtons'),
+      verbatimTextOutput(outputId = 'o_selectInput'),
+      verbatimTextOutput(outputId = 'o_sliderInput'),
+      verbatimTextOutput(outputId = 'o_textInput')
+      # verbatimTextOutput(outputId = 'o_submitButton')
     )
   )
 )
