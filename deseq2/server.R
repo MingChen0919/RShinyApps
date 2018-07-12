@@ -18,7 +18,9 @@ function(input, output, session) {
       return(NULL)
     }
     
-    read.csv(input$colDataInput$datapath, header=TRUE, row.names=1)
+    df = read.csv(input$colDataInput$datapath, header=TRUE, row.names=1)
+    sample_names = colnames(countData())
+    df[sample_names, ]
   })
   
   # file uploaded confirmation
